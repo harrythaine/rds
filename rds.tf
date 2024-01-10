@@ -9,26 +9,24 @@ resource "aws_vpc" "main" {
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "your_preferred_az"
   map_public_ip_on_launch = true
 }
 
 resource "aws_security_group" "rds_sg" {
   vpc_id = aws_vpc.main.id
-  name        = "allow_htb"
-  description = "Allow htb in inbound traffic"
-  // Add inbound and outbound rules as needed for your application
+  name        = "ecommerce_rds_sg"
+  description = "Allow inbound traffic for RDS"
 
   ingress {
     from_port   = 3306  # MySQL port
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = ["101.188.67.134/32"]
+    cidr_blocks = ["0.0.0.0/0"] # Allow traffic from any source (adjust as needed)
   }
+
   tags = {
-    Name = "htb_rds"
+    Name = "ecommerce_rds_sg"
   }
-}
 }
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
@@ -37,7 +35,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 }
 
 resource "aws_iam_role" "rds_role" {
-  name = "ecommerce-rds-role"
+  name = "ecommerce_rds_role"
 
   assume_role_policy = <<POLICY
 {
@@ -68,14 +66,14 @@ resource "aws_db_parameter_group" "rds_parameter_group" {
 
 resource "aws_db_instance" "rds_instance" {
   identifier           = "ecommerce-rds"
-  allocated_storage    = 100
+  allocated_storage    = 200  # Adjust based on customers requirements
   storage_type         = "gp2"
   engine               = "mysql"
   engine_version       = "5.7"
-  instance_class       = "db.t2.micro"
+  instance_class       = "db.t3.medium"  # Adjust based on customers requirements
   name                 = "ecommerce-db"
   username             = "admin"
-  password             = "your_password"
+  password             = var.db_password  # Use a variable for sensitive information
   multi_az             = true
   publicly_accessible = false
   db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.name
