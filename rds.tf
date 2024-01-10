@@ -1,4 +1,3 @@
-#test
 provider "aws" {
   region = "eu-west-2"
 }
@@ -16,7 +15,20 @@ resource "aws_subnet" "public" {
 
 resource "aws_security_group" "rds_sg" {
   vpc_id = aws_vpc.main.id
+  name        = "allow_htb"
+  description = "Allow htb in inbound traffic"
   // Add inbound and outbound rules as needed for your application
+
+  ingress {
+    from_port   = 3306  # MySQL port
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["101.188.67.134/32"]
+  }
+  tags = {
+    Name = "htb_rds"
+  }
+}
 }
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
@@ -52,8 +64,6 @@ resource "aws_db_parameter_group" "rds_parameter_group" {
     name  = "require_secure_transport"
     value = "1"
   }
-
-  // Add more parameters as needed
 }
 
 resource "aws_db_instance" "rds_instance" {
