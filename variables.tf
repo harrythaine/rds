@@ -1,3 +1,9 @@
-variable "TF_VAR_AWS_ACCESS_KEY_ID" {}
-variable "TF_VAR_AWS_SECRET_ACCESS_KEY" {}
-variable "db_password" {}
+variable "aws_access_key" {
+    default = ""
+}
+variable "aws_secret_key" {
+    default = ""
+}
+variable "db_password" {
+    default = ""
+}
